@@ -1,0 +1,12 @@
+{% load static %}
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Polls{% endblock %}</title>
+
+  <!-- 공통 CSS -->
+  <link rel="stylesheet" href="{% static 'polls/css/style.css' %}" />
+
+  <!-- 페이지별로 쓸 거면 유지 -->
+  <link rel="stylesheet" href="{% static 'polls/css/index.css' %}" />
+  <link rel="stylesheet" href="{% static 'polls/css/detail.css' %}" />
+</head>

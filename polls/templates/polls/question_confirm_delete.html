@@ -1,0 +1,15 @@
+{% extends "polls/base.html" %}
+{% block title %} 질문 삭제 {% endblock %}
+
+{% block content %}
+  <div class="form-container">
+    <h2>정말 삭제할까요?</h2>
+    <p>"{{ object.question_text }}"</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="submit-btn danger">삭제</button>
+      <a href="{% url 'polls:detail' object.id %}" class="submit-btn secondary">취소</a>
+    </form>
+  </div>
+{% endblock %}
