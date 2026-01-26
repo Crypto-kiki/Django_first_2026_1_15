@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "polls",
+    "accounts",
 ]
 
 MIDDLEWARE = [
@@ -70,8 +71,11 @@ TEMPLATES = [
 ]
 
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    BASE_DIR / "static",   # ✅ 공통 static 폴더
 ]
+
+# # 배포용(지금 당장은 없어도 됨, 하지만 나중에 꼭 필요)
+# STATIC_ROOT = BASE_DIR / "staticfiles"
 
 WSGI_APPLICATION = "mysite.wsgi.application"
 
@@ -127,3 +131,6 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_REDIRECT_URL = "polls:index"   # 로그인 성공 후 polls 홈으로
+LOGOUT_REDIRECT_URL = "polls:index"  # 로그아웃 후 polls 홈으로 (원하면)
