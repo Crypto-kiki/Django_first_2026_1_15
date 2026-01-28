@@ -18,11 +18,8 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    # 루트("/")로 접속하면 polls 앱이 바로 뜨도록
+    # 루트("/")에서 polls 앱이 바로 보이도록
     path("", include("polls.urls")),
-
-    # 기존대로 /polls/ 경로도 유지
-    path("polls/", include("polls.urls")),
 
     # 관리자 페이지
     path("admin/", admin.site.urls),
