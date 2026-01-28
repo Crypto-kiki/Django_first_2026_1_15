@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+import dj_database_url
+from pathlib import Path
 
 load_dotenv()
 
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware", # 배포시 여기에 추가
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -74,7 +77,7 @@ STATICFILES_DIRS = [
 ]
 
 # # 배포용(지금 당장은 없어도 됨, 하지만 나중에 꼭 필요)
-# STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 WSGI_APPLICATION = "mysite.wsgi.application"
 
@@ -94,20 +97,60 @@ WSGI_APPLICATION = "mysite.wsgi.application"
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = "django-insecure-yt5g&eeguw6!jr3^16a9l2+6l%7u)2p-c(+p*h&c=*=bfan*^5"
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY") or "ci-dev-secret-key"
+SECRET_KEY = (
+    os.environ.get("DJANGO_SECRET_KEY")
+    or os.environ.get("SECRET_KEY")
+    or "ci-dev-secret-key"
+    )
+DEBUG = os.environ.get("DEBUG", "0") == "1"
 
 # PostgreSQL 사용 설정(POSTGRES 유저명은 동일하나 비밀번호는 baekki로 했음.)
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB", "django_first2_db"),
-        "USER": os.environ.get("POSTGRES_USER", "django_user"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "strong-password"),
-        "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
-        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-    }
-}
+# 아래 데이터베이스는 배포 전
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": os.environ.get("POSTGRES_DB", "django_first2_db"),
+#         "USER": os.environ.get("POSTGRES_USER", "django_user"),
+#         "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "strong-password"),
+#         "HOST": os.environ.get("POSTGRES_HOST", "127.0.0.1"),
+#         "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+#     }
+# }
 
+# 배포 시(데이터베이스 URL을 이용한 설정)
+# DATABASES = {
+#     "default": dj_database_url.config(
+#         default=(
+#             os.environ.get("DATABASE_URL")
+#             or f"postgresql://{os.environ.get('POSTGRES_USER','django_user')}:"
+#                f"{os.environ.get('POSTGRES_PASSWORD','strong-password')}@"
+#                f"{os.environ.get('POSTGRES_HOST','127.0.0.1')}:"
+#                f"{os.environ.get('POSTGRES_PORT','5432')}/"
+#                f"{os.environ.get('POSTGRES_DB','django_first2_db')}"
+#         ),
+#         conn_max_age=600,
+#         ssl_require=bool(os.environ.get("DATABASE_URL")),  # Fly에서만 SSL 강제
+#     )
+# }
+
+# 배포시 에러가 발생하면
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True,
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -153,3 +196,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_REDIRECT_URL = "polls:index"   # 로그인 성공 후 polls 홈으로
 LOGOUT_REDIRECT_URL = "polls:index"  # 로그아웃 후 polls 홈으로 (원하면)
+
+# 배포된 주소로 수정 필요. (django-first-2026-1-15-white-silence-9857)
+ALLOWED_HOSTS = [
+    "django-first-2026-1-15-white-silence-9857.fly.dev",
+    "localhost",
+    "127.0.0.1",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://django-first-2026-1-15-white-silence-9857.fly.dev",
+]
